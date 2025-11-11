@@ -196,7 +196,9 @@ If risk of self-harm or harm to others is expressed, say:
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ error: `HTTP ${res.status}: ${res.statusText}` }));
-        throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+        const errorMsg = errorData.error || errorData.message || `HTTP ${res.status}: ${res.statusText}`;
+        console.error("API Error Response:", { status: res.status, data: errorData });
+        throw new Error(errorMsg);
       }
       
       const data = await res.json();

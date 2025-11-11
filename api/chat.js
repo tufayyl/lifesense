@@ -135,8 +135,12 @@ If risk of self-harm or harm to others is expressed, say:
     const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
     if (!OPENROUTER_API_KEY) {
-      return res.status(500).json({ error: "OPENROUTER_API_KEY not configured" });
+      console.error("OPENROUTER_API_KEY is missing from environment variables");
+      return res.status(500).json({ error: "OPENROUTER_API_KEY not configured. Please set it in Vercel environment variables." });
     }
+
+    // Log that we have the key (but not the actual key value for security)
+    console.log("OpenRouter API key present, model:", MODEL);
 
     // Get the origin for HTTP-Referer header
     const origin = req.headers.origin || req.headers.referer || "https://lifesense.vercel.app";
@@ -154,9 +158,23 @@ If risk of self-harm or harm to others is expressed, say:
 
     if (!r.ok) {
       const errorData = await r.json().catch(() => ({ error: `OpenRouter API error: ${r.status} ${r.statusText}` }));
-      console.error("OpenRouter API error:", errorData);
-      return res.status(r.status).json({ 
-        error: errorData.error?.message || errorData.error || `OpenRouter API error: ${r.status}` 
+      console.error("OpenRouter API error:", {
+        status: r.status,
+        statusText: r.statusText,
+        error: errorData
+      });
+      
+      // Provide helpful error messages based on status code
+      let errorMessage = errorData.error?.message || errorData.error || `OpenRouter API error: ${r.status}`;
+      if (r.status === 401) {
+        errorMessage = "Invalid OpenRouter API key. Please check your OPENROUTER_API_KEY in Vercel environment variables.";
+      } else if (r.status === 429) {
+        errorMessage = "Rate limit exceeded. Please try again later.";
+      }
+      
+      return res.status(200).json({ 
+        error: errorMessage,
+        details: errorData
       });
     }
 
