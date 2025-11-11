@@ -193,13 +193,20 @@ If risk of self-harm or harm to others is expressed, say:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: convo }),
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: `HTTP ${res.status}: ${res.statusText}` }));
+        throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+      }
+      
       const data = await res.json();
-      const reply = data?.reply?.trim?.() || "No response.";
+      const reply = data?.reply?.trim?.() || data?.error || "No response.";
       convo.push({ role: "assistant", content: reply });
       saveConvo();
       updateLastBotMessage(reply);
-    } catch {
-      const errText = "Backend missing. Set up /api/chat.";
+    } catch (error) {
+      console.error("Chat API error:", error);
+      const errText = error.message || "Backend error. Please check the console for details.";
       convo.push({ role: "assistant", content: errText });
       saveConvo();
       updateLastBotMessage(errText);
