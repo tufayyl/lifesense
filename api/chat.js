@@ -152,6 +152,14 @@ If risk of self-harm or harm to others is expressed, say:
       body: JSON.stringify({ model: MODEL, messages })
     });
 
+    if (!r.ok) {
+      const errorData = await r.json().catch(() => ({ error: `OpenRouter API error: ${r.status} ${r.statusText}` }));
+      console.error("OpenRouter API error:", errorData);
+      return res.status(r.status).json({ 
+        error: errorData.error?.message || errorData.error || `OpenRouter API error: ${r.status}` 
+      });
+    }
+
     const j = await r.json();
     const reply =
       j?.choices?.[0]?.message?.content?.trim?.() ||
