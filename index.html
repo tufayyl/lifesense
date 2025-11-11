@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeSense - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">LifeSense</h1>
+            <nav class="nav">
+                <button class="nav-btn" id="profileBtn">
+                    <span class="icon">👤</span>
+                    <span>Profile</span>
+                </button>
+                <button class="nav-btn" id="settingsBtn">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <div class="dashboard-container">
+            <h2 class="dashboard-title">Welcome to Your Dashboard</h2>
+            <div class="dashboard-content">
+
+                <div class="dashboard-card">
+                    <h3>Your Health Overview</h3>
+                    <p id="welcomeMessage">Welcome! Please complete your profile to see personalized information.</p>
+                    <div id="tempAnalysis" class="temp-analysis">
+                        <div class="temp-analysis-loading">Loading health analysis...</div>
+                    </div>
+                </div>
+<div class="dashboard-card temp-card" id="tempCard" role="button" aria-labelledby="tempTitle">
+    <h3 id="tempTitle">Temperature Trend</h3>
+    <div class="temp-thumb" id="tempThumbContainer">
+        <canvas id="tempThumb" height="80"></canvas>
+    </div>
+    <div class="temp-actions">
+        <button class="btn" id="openTempBtn">Open full chart</button>
+    </div>
+</div>
+
+                <div class="dashboard-card">
+                    <h3>Quick Stats</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Name</span>
+                            <span class="stat-value" id="displayName">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Age</span>
+                            <span class="stat-value" id="displayAge">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Height</span>
+                            <span class="stat-value" id="displayHeight">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Weight</span>
+                            <span class="stat-value" id="displayWeight">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heart Rate strip graph: spans 3 columns, no card chrome -->
+                <div class="vital-strip" style="grid-column: 1 / span 3;">
+                    <div class="vital-strip-label">Heart Rate</div>
+                    <canvas id="hrChart" height="120"></canvas>
+                </div>
+
+                <!-- SpO₂ strip graph: spans 3 columns, no card chrome -->
+                <div class="vital-strip" style="grid-column: 1 / span 3;">
+                    <div class="vital-strip-label">SpO₂</div>
+                    <canvas id="spo2Chart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Profile Information</h2>
+                <button class="close-btn" id="closeProfileModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" placeholder="Enter your age" min="1" max="150" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" name="height" placeholder="Enter your height in cm" min="50" max="300" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="weight" placeholder="Enter your weight in kg" min="20" max="300" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" id="cancelProfile">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-btn" id="closeSettingsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>Theme</h3>
+                    <div class="setting-item">
+                        <label for="themeToggle">Dark Mode</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="themeToggle" class="toggle-input">
+                            <label for="themeToggle" class="toggle-label"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Font Size</h3>
+                    <div class="setting-item">
+                        <label for="fontSize">Font Size: <span id="fontSizeValue">16</span>px</label>
+                        <input type="range" id="fontSize" min="12" max="24" value="16" class="slider">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                <!-- Temperature Modal (full view) -->
+                <div class="modal" id="tempModal">
+                    <div class="modal-content temp-modal-content">
+                        <div class="modal-header">
+                            <h2>Temperature Trend - Full View</h2>
+                            <button class="close-btn" id="closeTempModal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="temp-date-filter">
+                                <div class="date-filter-group">
+                                    <label for="tempStartDate">Start Date:</label>
+                                    <input type="date" id="tempStartDate" class="date-input">
+                                </div>
+                                <div class="date-filter-group">
+                                    <label for="tempEndDate">End Date:</label>
+                                    <input type="date" id="tempEndDate" class="date-input">
+                                </div>
+                                <button class="btn btn-primary" id="applyDateFilter">Apply Filter</button>
+                                <button class="btn btn-secondary" id="clearDateFilter">Clear</button>
+                            </div>
+                            <canvas id="tempChartLarge" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+<script src="temp-graph.js"></script>
+<script src="vitals-graphs.js"></script>
+<script src="chatbot.js"></script>
+
+
+
+
+</body>
+</html>
+

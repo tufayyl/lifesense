@@ -1,0 +1,22 @@
+{
+  "name": "lifesense",
+  "version": "1.0.0",
+  "description": "LifeSense - Health monitoring dashboard with AI assistant",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["health", "dashboard", "ai", "assistant"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
