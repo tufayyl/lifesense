@@ -1,13 +1,7 @@
 // --- Ensure Supabase and Chart.js are loaded before this file ---
 
-// Initialize Supabase client
-const supabaseUrl = "https://bbrleisgatjcrlnxatcc.supabase.co";
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJicmxlaXNnYXRqY3JsbnhhdGNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTE1NTYsImV4cCI6MjA3ODE2NzU1Nn0.r1YvySsMPFoMZMLhkTNQmDotbL6eIWUoaWN3xv91TuI";
-
-const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-
-console.log("Supabase client initialized:", supabase);
+// Use shared Supabase client (initialized in supabase-init.js)
+// Client will be accessed via window.supabaseClient when needed
 
 // Chart contexts (thumbnail and large)
 const thumbEl = document.getElementById("tempThumb");
@@ -37,8 +31,15 @@ let dateFilterStart = null;
 let dateFilterEnd = null;
 
 async function fetchTemperature(startDate = null, endDate = null) {
+  // Get shared Supabase client
+  const client = window.supabaseClient;
+  if (!client) {
+    console.warn('Supabase client not available yet, will retry...');
+    setTimeout(() => fetchTemperature(startDate, endDate), 500);
+    return;
+  }
   try {
-    let query = supabase
+    let query = client
       .from("temper")
       .select("degree, time")
       .order("time", { ascending: true });
@@ -128,11 +129,18 @@ async function fetchTemperature(startDate = null, endDate = null) {
   }
 }
 
-// Initial fetch and auto-refresh
-fetchTemperature();
-setInterval(() => {
-  fetchTemperature(dateFilterStart, dateFilterEnd);
-}, 10000);
+// Initial fetch and auto-refresh - wait for client to be ready
+function initTemperatureGraph() {
+  if (window.supabaseClient) {
+    fetchTemperature();
+    setInterval(() => {
+      fetchTemperature(dateFilterStart, dateFilterEnd);
+    }, 10000);
+  } else {
+    setTimeout(initTemperatureGraph, 100);
+  }
+}
+initTemperatureGraph();
 
 // helper to render thumbnail chart
 function renderThumb() {

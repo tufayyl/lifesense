@@ -8,11 +8,7 @@
   const REFRESH_INTERVAL_MS = 5000; // Refresh every 5 seconds
   const DEFAULT_MAX_POINTS = 150; // rolling window length
 
-  // Initialize Supabase client
-  const VITALS_SUPABASE_URL = "https://bbrleisgatjcrlnxatcc.supabase.co";
-  const VITALS_SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJicmxlaXNnYXRqY3JsbnhhdGNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTE1NTYsImV4cCI6MjA3ODE2NzU1Nn0.r1YvySsMPFoMZMLhkTNQmDotbL6eIWUoaWN3xv91TuI";
-  
+  // Use shared Supabase client (initialized in supabase-init.js)
   let supa = null;
 
   // Canvas elements
@@ -274,16 +270,16 @@
   document.addEventListener("DOMContentLoaded", () => {
     MAX_POINTS = computeMaxPoints();
     
-    // Wait for Supabase to be available
+    // Wait for shared Supabase client to be available
     function initSupabase() {
-      if (typeof window.supabase === 'undefined') {
-        console.warn('Supabase not loaded yet, retrying...');
+      if (window.supabaseClient) {
+        supa = window.supabaseClient;
+      } else {
+        // Retry if client not ready yet
+        console.warn('Shared Supabase client not ready yet, retrying...');
         setTimeout(initSupabase, 500);
         return;
       }
-      
-      // Initialize Supabase client
-      supa = window.supabase.createClient(VITALS_SUPABASE_URL, VITALS_SUPABASE_ANON_KEY);
       
       // Initial fetch and render
       refreshVitals();

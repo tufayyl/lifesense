@@ -152,15 +152,13 @@ fontSizeSlider.addEventListener('input', (e) => {
 async function fetchTemperatureAnalysis() {
     try {
         // Wait for Supabase to be available
-        if (typeof window.supabase === 'undefined') {
-            console.warn('Supabase not loaded yet, retrying...');
+        // Use shared Supabase client
+        const supabase = window.supabaseClient;
+        if (!supabase) {
+            console.warn('Supabase client not initialized yet, retrying...');
             setTimeout(fetchTemperatureAnalysis, 1000);
             return;
         }
-
-        const supabaseUrl = "https://bbrleisgatjcrlnxatcc.supabase.co";
-        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJicmxlaXNnYXRqY3JsbnhhdGNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTE1NTYsImV4cCI6MjA3ODE2NzU1Nn0.r1YvySsMPFoMZMLhkTNQmDotbL6eIWUoaWN3xv91TuI";
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         // Fetch last 15 temperature readings
         const { data: tempData, error: tempError } = await supabase
