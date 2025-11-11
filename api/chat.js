@@ -139,8 +139,14 @@ If risk of self-harm or harm to others is expressed, say:
       return res.status(500).json({ error: "OPENROUTER_API_KEY not configured. Please set it in Vercel environment variables." });
     }
 
+    // Validate API key format (OpenRouter keys start with sk-or-v1-)
+    if (!OPENROUTER_API_KEY.startsWith('sk-or-v1-')) {
+      console.error("OPENROUTER_API_KEY format appears invalid (should start with 'sk-or-v1-')");
+      return res.status(500).json({ error: "Invalid API key format. OpenRouter keys should start with 'sk-or-v1-'. Please check your OPENROUTER_API_KEY in Vercel." });
+    }
+
     // Log that we have the key (but not the actual key value for security)
-    console.log("OpenRouter API key present, model:", MODEL);
+    console.log("OpenRouter API key present, model:", MODEL, "Key prefix:", OPENROUTER_API_KEY.substring(0, 10) + "...");
 
     // Get the origin for HTTP-Referer header
     const origin = req.headers.origin || req.headers.referer || "https://lifesense.vercel.app";
