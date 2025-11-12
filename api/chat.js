@@ -108,6 +108,78 @@ If risk of self-harm or harm to others is expressed, say:
       }
     }
 
+    async function fetchLatestSpO2(limit = 15) {
+      try {
+        const url = new URL(`${SUPABASE_URL}/rest/v1/heartrate`);
+        // select columns, sort by created_at desc, limit
+        url.searchParams.set("select", "spo2,created_at");
+        url.searchParams.set("order", "created_at.desc");
+        url.searchParams.set("limit", String(limit));
+        const r = await fetch(url.toString(), {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!r.ok) throw new Error(`Supabase ${r.status}`);
+        const rows = await r.json();
+        if (!Array.isArray(rows) || rows.length === 0) return null;
+        // Filter out null values and reverse for chronological readability
+        const validRows = rows.filter(x => x.spo2 != null);
+        if (validRows.length === 0) return null;
+        const chron = validRows.slice().reverse();
+        const lines = chron.map(x => {
+          const t = new Date(x.created_at);
+          const ts = isNaN(t.getTime()) ? String(x.created_at) : t.toISOString();
+          return `${ts} -> ${x.spo2}%`;
+        });
+        return {
+          latestValue: chron[chron.length - 1]?.spo2,
+          formatted: lines.join("\n"),
+        };
+      } catch (e) {
+        console.error("fetchLatestSpO2 error:", e?.message || e);
+        return null;
+      }
+    }
+
+    async function fetchLatestBPM(limit = 10) {
+      try {
+        const url = new URL(`${SUPABASE_URL}/rest/v1/heartrate`);
+        // select columns, sort by created_at desc, limit
+        url.searchParams.set("select", "bpm,created_at");
+        url.searchParams.set("order", "created_at.desc");
+        url.searchParams.set("limit", String(limit));
+        const r = await fetch(url.toString(), {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!r.ok) throw new Error(`Supabase ${r.status}`);
+        const rows = await r.json();
+        if (!Array.isArray(rows) || rows.length === 0) return null;
+        // Filter out null values and reverse for chronological readability
+        const validRows = rows.filter(x => x.bpm != null);
+        if (validRows.length === 0) return null;
+        const chron = validRows.slice().reverse();
+        const lines = chron.map(x => {
+          const t = new Date(x.created_at);
+          const ts = isNaN(t.getTime()) ? String(x.created_at) : t.toISOString();
+          return `${ts} -> ${x.bpm} bpm`;
+        });
+        return {
+          latestValue: chron[chron.length - 1]?.bpm,
+          formatted: lines.join("\n"),
+        };
+      } catch (e) {
+        console.error("fetchLatestBPM error:", e?.message || e);
+        return null;
+      }
+    }
+
     // ---- Process request ----
     const clientMsgs = Array.isArray(req.body?.messages) ? req.body.messages : [];
     if (!inScope(clientMsgs)) {
@@ -116,19 +188,40 @@ If risk of self-harm or harm to others is expressed, say:
 
     let messages = ensureSystemSeed(sanitizeHistory(clientMsgs));
 
-    // If the user is asking about temperature, enrich with hidden context
+    // Always fetch latest SpO2 and BPM readings and add to hidden system prompt
+    const [spo2Data, bpmData] = await Promise.all([
+      fetchLatestSpO2(15),
+      fetchLatestBPM(10)
+    ]);
+
+    // Build hidden context with vital signs
+    const vitalSignsContext = [];
+    
+    if (spo2Data?.formatted) {
+      vitalSignsContext.push(`Last 15 SpO2 readings (newest last):\n${spo2Data.formatted}`);
+    }
+    
+    if (bpmData?.formatted) {
+      vitalSignsContext.push(`Last 10 BPM readings (newest last):\n${bpmData.formatted}`);
+    }
+
+    // If the user is asking about temperature, also include temperature readings
     const userText = lastUserText(messages).toLowerCase();
     if (["temp","temperature","fever","heat","body temp"].some(k => userText.includes(k))) {
       const temps = await fetchLatestTemperatures(15);
       if (temps?.formatted) {
-        const tempContext =
-          `Recent temperature readings (newest last):\n${temps.formatted}\n\n` +
-          `Guidance: Refer to these readings when asked about temperature. Interpret trends briefly.`;
-        messages = [
-          { role: "system", content: tempContext },
-          ...messages
-        ];
+        vitalSignsContext.push(`Recent temperature readings (newest last):\n${temps.formatted}`);
       }
+    }
+
+    // Add vital signs context to system prompt if available
+    if (vitalSignsContext.length > 0) {
+      const contextText = vitalSignsContext.join("\n\n") + 
+        "\n\nGuidance: You have access to these recent vital sign readings. Refer to them when relevant to provide accurate health insights. Interpret trends briefly and encourage professional care for concerning values.";
+      messages = [
+        { role: "system", content: contextText },
+        ...messages
+      ];
     }
 
     const MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct";
