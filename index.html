@@ -28,16 +28,23 @@
     <main class="dashboard">
         <div class="dashboard-container">
             <h2 class="dashboard-title">Welcome to Your Dashboard</h2>
+            
+            <!-- Mobile-only action buttons -->
+            <div class="mobile-actions" id="mobileActions">
+                <button class="btn btn-primary mobile-action-btn" id="showOverviewBtn">Overview</button>
+                <button class="btn btn-primary mobile-action-btn" id="openChartBtn">Open Chart</button>
+            </div>
+            
             <div class="dashboard-content">
 
-                <div class="dashboard-card">
+                <div class="dashboard-card mobile-hidden-card" id="overviewCard">
                     <h3>Your Health Overview</h3>
                     <p id="welcomeMessage">Welcome! Please complete your profile to see personalized information.</p>
                     <div id="tempAnalysis" class="temp-analysis">
                         <div class="temp-analysis-loading">Loading health analysis...</div>
                     </div>
                 </div>
-<div class="dashboard-card temp-card" id="tempCard" role="button" aria-labelledby="tempTitle">
+<div class="dashboard-card temp-card mobile-hidden-card" id="tempCard" role="button" aria-labelledby="tempTitle">
     <h3 id="tempTitle">Temperature Trend</h3>
     <div class="temp-thumb" id="tempThumbContainer">
         <canvas id="tempThumb" height="80"></canvas>
@@ -47,7 +54,7 @@
     </div>
 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-card mobile-hidden-card" id="quickStatsCard">
                     <h3>Quick Stats</h3>
                     <div class="stats-grid">
                         <div class="stat-item">

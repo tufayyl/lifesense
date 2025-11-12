@@ -627,8 +627,42 @@ body {
     border: none;
 }
 
+/* Mobile action buttons - hidden on desktop */
+.mobile-actions {
+    display: none;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+    flex-wrap: wrap;
+}
+
+.mobile-action-btn {
+    flex: 1;
+    min-width: 150px;
+}
+
+/* Hide cards on mobile by default */
+.mobile-hidden-card {
+    display: block;
+}
+
 /* Responsive - Mobile Styles */
 @media (max-width: 768px) {
+    /* Show mobile action buttons */
+    .mobile-actions {
+        display: flex;
+    }
+    
+    /* Hide cards on mobile by default */
+    .mobile-hidden-card {
+        display: none;
+    }
+    
+    /* Show cards when they have the visible class */
+    .mobile-hidden-card.mobile-visible {
+        display: block;
+    }
+    
     /* Header adjustments */
     .header {
         padding: 0.75rem 1rem;

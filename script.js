@@ -404,9 +404,46 @@ async function generateHealthAnalysis(
     }
 }
 
+// Mobile card visibility handlers
+function setupMobileCardVisibility() {
+    const showOverviewBtn = document.getElementById('showOverviewBtn');
+    const openChartBtn = document.getElementById('openChartBtn');
+    const overviewCard = document.getElementById('overviewCard');
+    const tempCard = document.getElementById('tempCard');
+    const quickStatsCard = document.getElementById('quickStatsCard');
+    const openTempBtn = document.getElementById('openTempBtn');
+    const tempModal = document.getElementById('tempModal');
+    const closeTempModal = document.getElementById('closeTempModal');
+
+    if (showOverviewBtn && overviewCard && quickStatsCard) {
+        showOverviewBtn.addEventListener('click', () => {
+            overviewCard.classList.toggle('mobile-visible');
+            quickStatsCard.classList.toggle('mobile-visible');
+            // Scroll to overview card when shown
+            if (overviewCard.classList.contains('mobile-visible')) {
+                overviewCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    if (openChartBtn && tempCard) {
+        openChartBtn.addEventListener('click', () => {
+            tempCard.classList.add('mobile-visible');
+            tempCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // After showing the card, open the full chart modal
+            setTimeout(() => {
+                if (openTempBtn) {
+                    openTempBtn.click();
+                }
+            }, 300);
+        });
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadSavedData();
+    setupMobileCardVisibility();
     // Fetch temperature analysis after a short delay to ensure Supabase is loaded
     setTimeout(fetchTemperatureAnalysis, 1500);
     // Refresh analysis every 30 seconds
