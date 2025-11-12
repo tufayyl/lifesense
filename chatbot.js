@@ -56,8 +56,41 @@ If risk of self-harm or harm to others is expressed, say:
     zIndex: "9999",
     transition: "transform 0.3s ease"
   });
-  chatButton.addEventListener("mouseenter", () => (chatButton.style.transform = "scale(1.1)"));
-  chatButton.addEventListener("mouseleave", () => (chatButton.style.transform = "scale(1)"));
+  
+  // Mobile adjustments for chat button
+  if (window.innerWidth <= 768) {
+    chatButton.style.width = "60px";
+    chatButton.style.height = "60px";
+    chatButton.style.bottom = "20px";
+    chatButton.style.right = "20px";
+    chatButton.style.fontSize = "28px";
+  }
+  
+  // Update on resize
+  window.addEventListener("resize", () => {
+    if (window.innerWidth <= 768) {
+      chatButton.style.width = "60px";
+      chatButton.style.height = "60px";
+      chatButton.style.bottom = "20px";
+      chatButton.style.right = "20px";
+      chatButton.style.fontSize = "28px";
+    } else {
+      chatButton.style.width = "70px";
+      chatButton.style.height = "70px";
+      chatButton.style.bottom = "25px";
+      chatButton.style.right = "25px";
+      chatButton.style.fontSize = "34px";
+    }
+  });
+  
+  chatButton.addEventListener("mouseenter", () => {
+    if (window.innerWidth > 768) {
+      chatButton.style.transform = "scale(1.1)";
+    }
+  });
+  chatButton.addEventListener("mouseleave", () => {
+    chatButton.style.transform = "scale(1)";
+  });
   document.body.appendChild(chatButton);
 
   // --- global styles ---
@@ -76,6 +109,27 @@ If risk of self-harm or harm to others is expressed, say:
       box-shadow:0 8px 30px rgba(0,0,0,0.3); overflow:hidden;
       border:1px solid rgba(255,255,255,0.2); z-index:9998;
       transition:all 0.3s ease;
+    }
+    @media (max-width: 768px) {
+      .chat-container {
+        bottom: 90px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        height: calc(100vh - 120px);
+        max-height: 600px;
+        border-radius: 16px;
+      }
+    }
+    @media (max-width: 480px) {
+      .chat-container {
+        bottom: 80px;
+        right: 5px;
+        left: 5px;
+        height: calc(100vh - 100px);
+        max-height: 550px;
+        border-radius: 12px;
+      }
     }
     .chat-header {
       background:linear-gradient(135deg,#0072ff,#00c6ff);
