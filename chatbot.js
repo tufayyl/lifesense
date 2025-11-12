@@ -242,7 +242,12 @@ If risk of self-harm or harm to others is expressed, say:
     saveConvo();
 
     try {
-      const res = await fetch("/api/chat", {
+      // Check if we're running on a server (not file:// protocol)
+      const apiUrl = window.location.protocol === 'file:' 
+        ? 'http://localhost:3000/api/chat' 
+        : '/api/chat';
+      
+      const res = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: convo }),

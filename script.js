@@ -323,7 +323,12 @@ async function generateHealthAnalysis(
         
         prompt += `Please provide a very brief, friendly, and professional health assessment in exactly 2 short sentences covering all three metrics. Keep it concise and encouraging.`;
 
-        const response = await fetch('/api/chat', {
+        // Check if we're running on a server (not file:// protocol)
+        const apiUrl = window.location.protocol === 'file:' 
+            ? 'http://localhost:3000/api/chat' 
+            : '/api/chat';
+        
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
