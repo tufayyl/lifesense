@@ -1,3 +1,11 @@
+// Helper function to get API URL - handles file:// protocol
+function getApiUrl(endpoint) {
+  if (window.location.protocol === 'file:' || window.location.hostname === '') {
+    return `http://localhost:3000${endpoint}`;
+  }
+  return endpoint;
+}
+
 // DOM Elements
 const profileBtn = document.getElementById('profileBtn');
 const settingsBtn = document.getElementById('settingsBtn');
@@ -323,10 +331,7 @@ async function generateHealthAnalysis(
         
         prompt += `Please provide a very brief, friendly, and professional health assessment in exactly 2 short sentences covering all three metrics. Keep it concise and encouraging.`;
 
-        // Check if we're running on a server (not file:// protocol)
-        const apiUrl = window.location.protocol === 'file:' 
-            ? 'http://localhost:3000/api/chat' 
-            : '/api/chat';
+        const apiUrl = getApiUrl('/api/chat');
         
         const response = await fetch(apiUrl, {
             method: 'POST',

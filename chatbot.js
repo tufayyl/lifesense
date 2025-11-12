@@ -1,4 +1,13 @@
 // chatbot.js — modern glassy UI + auto greeting + health-only logic
+
+// Helper function to get API URL - handles file:// protocol
+function getApiUrl(endpoint) {
+  if (window.location.protocol === 'file:' || window.location.hostname === '') {
+    return `http://localhost:3000${endpoint}`;
+  }
+  return endpoint;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const HEALTH_POLICY = `
 You are a health-only assistant. Scope: personal health safety, mental health, sleep, diet/nutrition/hydration, physical activity/fitness, and interpreting simple temperature readings.
@@ -242,10 +251,7 @@ If risk of self-harm or harm to others is expressed, say:
     saveConvo();
 
     try {
-      // Check if we're running on a server (not file:// protocol)
-      const apiUrl = window.location.protocol === 'file:' 
-        ? 'http://localhost:3000/api/chat' 
-        : '/api/chat';
+      const apiUrl = getApiUrl('/api/chat');
       
       const res = await fetch(apiUrl, {
         method: "POST",
@@ -267,7 +273,15 @@ If risk of self-harm or harm to others is expressed, say:
       updateLastBotMessage(reply);
     } catch (error) {
       console.error("Chat API error:", error);
-      const errText = error.message || "Backend error. Please check the console for details.";
+      let errText = error.message || "Backend error. Please check the console for details.";
+      
+      // Provide helpful message if opening file directly
+      if ((error.message.includes('Failed to fetch') || error.message.includes('ERR_FAILED')) && 
+          window.location.protocol === 'file:') {
+        errText = "⚠️ Please run 'npm start' and open http://localhost:3000. Opening the HTML file directly won't work.";
+        console.warn('⚠️ You are opening the HTML file directly. Please run "npm start" and open http://localhost:3000 instead.');
+      }
+      
       convo.push({ role: "assistant", content: errText });
       saveConvo();
       updateLastBotMessage(errText);
